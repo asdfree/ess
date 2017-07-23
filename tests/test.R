@@ -7,72 +7,88 @@ ess_cat <-
 		output_dir = file.path( getwd() ) , 
 		your_email = my_email_address )
 
-# 2015 only
-ess_cat <- subset( ess_cat , year == 2015 )
+# 2014 only
+ess_cat <- subset( ess_cat , year == 2014 )
 # download the microdata to your local computer
 stopifnot( nrow( ess_cat ) > 0 )
 
 
 library(survey)
 
-ess_df <- readRDS( file.path( getwd() , "2015 main.rds" ) )
+ess_be_df <- 
+	readRDS( file.path( getwd() , "2014/ESS7BE.rds" ) )
+
+ess_sddf_df <- 
+	readRDS( file.path( getwd() , "2014/ESS7SDDFe01_1.rds" ) )
+
+ess_df <-
+	merge( 
+		ess_be_df , 
+		ess_sddf_df , 
+		by = c( 'cntry' , 'idno' ) 
+	)
+
+stopifnot( nrow( ess_df ) == nrow( ess_be_df ) )
 
 ess_design <- 
-	svydesign( 
-		~ psu , 
-		strata = ~ stratum , 
-		data = ess_df , 
-		weights = ~ weight , 
-		nest = TRUE 
+	svydesign(
+		ids = ~psu ,
+		strata = ~stratify ,
+		probs = ~prob ,
+		data = ess_df
 	)
 ess_design <- 
 	update( 
 		ess_design , 
-		q2 = q2 ,
-		never_rarely_wore_bike_helmet = as.numeric( qn8 == 1 ) ,
-		ever_smoked_marijuana = as.numeric( qn47 == 1 ) ,
-		ever_tried_to_quit_cigarettes = as.numeric( q36 > 2 ) ,
-		smoked_cigarettes_past_year = as.numeric( q36 > 1 )
+		
+		# allow many/few immigrants from poorer countries outside Europe
+		allow_immigrants_from_poorer_countries_outside_europe =
+			factor( impcntr ,
+				labels = c( 'Allow many to come and live here' , 
+				'Allow some' , 'Allow a few' , 'Allow none' )
+			) ,
+		
+		sex = factor( icgndra , labels = c( 'male' , 'female' ) ) ,
+			
+		more_than_one_hour_tv_daily = as.numeric( tvtot >= 3 )
 	)
 sum( weights( ess_design , "sampling" ) != 0 )
 
-svyby( ~ one , ~ ever_smoked_marijuana , ess_design , unwtd.count )
+svyby( ~ one , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , unwtd.count )
 svytotal( ~ one , ess_design )
 
-svyby( ~ one , ~ ever_smoked_marijuana , ess_design , svytotal )
-svymean( ~ bmipct , ess_design , na.rm = TRUE )
+svyby( ~ one , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svytotal )
+svymean( ~ ppltrst , ess_design )
 
-svyby( ~ bmipct , ~ ever_smoked_marijuana , ess_design , svymean , na.rm = TRUE )
-svymean( ~ q2 , ess_design , na.rm = TRUE )
+svyby( ~ ppltrst , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svymean )
+svymean( ~ sex , ess_design , na.rm = TRUE )
 
-svyby( ~ q2 , ~ ever_smoked_marijuana , ess_design , svymean , na.rm = TRUE )
-svytotal( ~ bmipct , ess_design , na.rm = TRUE )
+svyby( ~ sex , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svymean , na.rm = TRUE )
+svytotal( ~ ppltrst , ess_design )
 
-svyby( ~ bmipct , ~ ever_smoked_marijuana , ess_design , svytotal , na.rm = TRUE )
-svytotal( ~ q2 , ess_design , na.rm = TRUE )
+svyby( ~ ppltrst , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svytotal )
+svytotal( ~ sex , ess_design , na.rm = TRUE )
 
-svyby( ~ q2 , ~ ever_smoked_marijuana , ess_design , svytotal , na.rm = TRUE )
-svyquantile( ~ bmipct , ess_design , 0.5 , na.rm = TRUE )
+svyby( ~ sex , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svytotal , na.rm = TRUE )
+svyquantile( ~ ppltrst , ess_design , 0.5 )
 
 svyby( 
-	~ bmipct , 
-	~ ever_smoked_marijuana , 
+	~ ppltrst , 
+	~ allow_immigrants_from_poorer_countries_outside_europe , 
 	ess_design , 
 	svyquantile , 
 	0.5 ,
 	ci = TRUE ,
-	keep.var = TRUE ,
-	na.rm = TRUE
+	keep.var = TRUE 
 )
 svyratio( 
-	numerator = ~ ever_tried_to_quit_cigarettes , 
-	denominator = ~ smoked_cigarettes_past_year , 
-	ess_design ,
-	na.rm = TRUE
+	numerator = ~ ppltrst , 
+	denominator = ~ pplfair , 
+	ess_design 
 )
-sub_ess_design <- subset( ess_design , qn41 == 1 )
-svymean( ~ bmipct , sub_ess_design , na.rm = TRUE )
-this_result <- svymean( ~ bmipct , ess_design , na.rm = TRUE )
+sub_ess_design <- subset( ess_design , vote == 1 )
+svymean( ~ ppltrst , sub_ess_design )
+this_result <- svymean( ~ ppltrst , ess_design )
 
 coef( this_result )
 SE( this_result )
@@ -81,11 +97,10 @@ cv( this_result )
 
 grouped_result <-
 	svyby( 
-		~ bmipct , 
-		~ ever_smoked_marijuana , 
+		~ ppltrst , 
+		~ allow_immigrants_from_poorer_countries_outside_europe , 
 		ess_design , 
-		svymean ,
-		na.rm = TRUE 
+		svymean 
 	)
 	
 coef( grouped_result )
@@ -93,22 +108,22 @@ SE( grouped_result )
 confint( grouped_result )
 cv( grouped_result )
 degf( ess_design )
-svyvar( ~ bmipct , ess_design , na.rm = TRUE )
+svyvar( ~ ppltrst , ess_design )
 # SRS without replacement
-svymean( ~ bmipct , ess_design , na.rm = TRUE , deff = TRUE )
+svymean( ~ ppltrst , ess_design , deff = TRUE )
 
 # SRS with replacement
-svymean( ~ bmipct , ess_design , na.rm = TRUE , deff = "replace" )
-svyciprop( ~ never_rarely_wore_bike_helmet , ess_design ,
+svymean( ~ ppltrst , ess_design , deff = "replace" )
+svyciprop( ~ more_than_one_hour_tv_daily , ess_design ,
 	method = "likelihood" , na.rm = TRUE )
-svyttest( bmipct ~ never_rarely_wore_bike_helmet , ess_design )
+svyttest( ppltrst ~ more_than_one_hour_tv_daily , ess_design )
 svychisq( 
-	~ never_rarely_wore_bike_helmet + q2 , 
+	~ more_than_one_hour_tv_daily + sex , 
 	ess_design 
 )
 glm_result <- 
 	svyglm( 
-		bmipct ~ never_rarely_wore_bike_helmet + q2 , 
+		ppltrst ~ more_than_one_hour_tv_daily + sex , 
 		ess_design 
 	)
 
@@ -116,9 +131,9 @@ summary( glm_result )
 library(srvyr)
 ess_srvyr_design <- as_survey( ess_design )
 ess_srvyr_design %>%
-	summarize( mean = survey_mean( bmipct , na.rm = TRUE ) )
+	summarize( mean = survey_mean( ppltrst ) )
 
 ess_srvyr_design %>%
-	group_by( ever_smoked_marijuana ) %>%
-	summarize( mean = survey_mean( bmipct , na.rm = TRUE ) )
+	group_by( allow_immigrants_from_poorer_countries_outside_europe ) %>%
+	summarize( mean = survey_mean( ppltrst ) )
 
