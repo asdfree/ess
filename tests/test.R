@@ -4,12 +4,14 @@ library(lodown)
 # examine all available ESS microdata files
 ess_cat <-
 	get_catalog( "ess" ,
-		output_dir = file.path( getwd() ) )
+		output_dir = file.path( getwd() ) , 
+		your_email = my_email_address )
 
 # 2015 only
 ess_cat <- subset( ess_cat , year == 2015 )
 # download the microdata to your local computer
 stopifnot( nrow( ess_cat ) > 0 )
+
 
 library(survey)
 
