@@ -41,8 +41,9 @@ ess_design <-
 	update( 
 		ess_design , 
 		
-		# allow many/few immigrants from poorer countries outside Europe
-		allow_immigrants_from_poorer_countries_outside_europe =
+		one = 1 ,
+		
+		non_european_immigrants =
 			factor( impcntr ,
 				labels = c( 'Allow many to come and live here' , 
 				'Allow some' , 'Allow a few' , 'Allow none' )
@@ -54,27 +55,27 @@ ess_design <-
 	)
 sum( weights( ess_design , "sampling" ) != 0 )
 
-svyby( ~ one , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , unwtd.count )
+svyby( ~ one , ~ non_european_immigrants , ess_design , unwtd.count )
 svytotal( ~ one , ess_design )
 
-svyby( ~ one , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svytotal )
+svyby( ~ one , ~ non_european_immigrants , ess_design , svytotal )
 svymean( ~ ppltrst , ess_design )
 
-svyby( ~ ppltrst , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svymean )
+svyby( ~ ppltrst , ~ non_european_immigrants , ess_design , svymean )
 svymean( ~ sex , ess_design , na.rm = TRUE )
 
-svyby( ~ sex , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svymean , na.rm = TRUE )
+svyby( ~ sex , ~ non_european_immigrants , ess_design , svymean , na.rm = TRUE )
 svytotal( ~ ppltrst , ess_design )
 
-svyby( ~ ppltrst , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svytotal )
+svyby( ~ ppltrst , ~ non_european_immigrants , ess_design , svytotal )
 svytotal( ~ sex , ess_design , na.rm = TRUE )
 
-svyby( ~ sex , ~ allow_immigrants_from_poorer_countries_outside_europe , ess_design , svytotal , na.rm = TRUE )
+svyby( ~ sex , ~ non_european_immigrants , ess_design , svytotal , na.rm = TRUE )
 svyquantile( ~ ppltrst , ess_design , 0.5 )
 
 svyby( 
 	~ ppltrst , 
-	~ allow_immigrants_from_poorer_countries_outside_europe , 
+	~ non_european_immigrants , 
 	ess_design , 
 	svyquantile , 
 	0.5 ,
@@ -98,7 +99,7 @@ cv( this_result )
 grouped_result <-
 	svyby( 
 		~ ppltrst , 
-		~ allow_immigrants_from_poorer_countries_outside_europe , 
+		~ non_european_immigrants , 
 		ess_design , 
 		svymean 
 	)
@@ -134,6 +135,6 @@ ess_srvyr_design %>%
 	summarize( mean = survey_mean( ppltrst ) )
 
 ess_srvyr_design %>%
-	group_by( allow_immigrants_from_poorer_countries_outside_europe ) %>%
+	group_by( non_european_immigrants ) %>%
 	summarize( mean = survey_mean( ppltrst ) )
 
