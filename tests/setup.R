@@ -13,8 +13,8 @@ ess_cat <-
 # 2014 only
 ess_cat <- subset( ess_cat , year == 2014 )
 # download the microdata to your local computer
-lodown( "ess" , ess_cat , 
-	your_email = my_email_address )
+
+
 
 library(survey)
 
