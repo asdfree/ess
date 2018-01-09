@@ -1,8 +1,21 @@
 if ( .Platform$OS.type == 'windows' ) memory.limit( 256000 )
 my_email_address <- Sys.getenv( "my_email_address" )
+this_sample_break <- Sys.getenv( "this_sample_break" )
+
 library(lodown)
-lodown( "ess" , output_dir = file.path( getwd() ) , 
+
+ess_cat <-
+	get_catalog( "ess" ,
+		output_dir = file.path( getwd() ) , 
+		your_email = my_email_address )
+
+record_categories <- ceiling( seq( nrow( ess_cat ) ) / ceiling( nrow( ess_cat ) / 2 ) )
+
+ess_cat <- ess_cat[ record_categories == this_sample_break , ]
+
+lodown( "ess" , ess_cat , 
 	your_email = my_email_address )
+if( any( ess_cat$year == 2014 ) ){
 library(lodown)
 # examine all available ESS microdata files
 ess_cat <-
@@ -141,3 +154,4 @@ ess_srvyr_design %>%
 	group_by( non_european_immigrants ) %>%
 	summarize( mean = survey_mean( ppltrst ) )
 
+}
