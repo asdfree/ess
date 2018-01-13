@@ -1,4 +1,6 @@
 if ( .Platform$OS.type == 'windows' ) memory.limit( 256000 )
+
+options("lodown.cachaca.savecache"=FALSE)
 my_email_address <- Sys.getenv( "my_email_address" )
 this_sample_break <- Sys.getenv( "this_sample_break" )
 
