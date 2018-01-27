@@ -11,7 +11,7 @@ ess_cat <-
 		output_dir = file.path( getwd() ) , 
 		your_email = my_email_address )
 
-ess_cat <- ess_cat[ split( seq( nrow( ess_cat ) ) , sort( seq( nrow( ess_cat ) ) %% 3 ) )[[ this_sample_break ]] , ]
+ess_cat <- ess_cat[ split( seq( nrow( ess_cat ) ) , 1 + sort( seq( nrow( ess_cat ) ) %% 3 ) )[[ this_sample_break ]] , ]
 
 lodown( "ess" , ess_cat , 
 	your_email = my_email_address )
