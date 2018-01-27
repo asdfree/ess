@@ -30,6 +30,7 @@ environment:
     matrix:
     - this_sample_break: 1
     - this_sample_break: 2
+    - this_sample_break: 3
 
 
 
