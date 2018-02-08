@@ -13,19 +13,19 @@ ess_cat <-
 
 ess_cat <- ess_cat[ split( seq( nrow( ess_cat ) ) , 1 + sort( seq( nrow( ess_cat ) ) %% 3 ) )[[ this_sample_break ]] , ]
 
-lodown( "ess" , ess_cat , 
+ess_cat <- lodown( "ess" , ess_cat , 
 	your_email = my_email_address )
 if( any( ess_cat$year == 2014 ) ){
-library(lodown)
-# examine all available ESS microdata files
-ess_cat <-
-	get_catalog( "ess" ,
-		output_dir = file.path( getwd() ) , 
-		your_email = my_email_address )
 
-# 2014 only
-ess_cat <- subset( ess_cat , year == 2014 )
-# download the microdata to your local computer
+
+
+
+
+
+
+
+
+
 
 
 
